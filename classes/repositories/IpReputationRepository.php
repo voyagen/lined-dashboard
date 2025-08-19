@@ -193,6 +193,10 @@ class IpReputationRepository extends Repository {
     }
 
 
+    /**
+     * Get timeline data for the dashboard
+     * @return array Returns an associative array where keys are IP addresses and values are arrays of IpReputation model instances
+     */
     public function getTimelineData() {
         return $this->getAllGroupedByIp();
     }
