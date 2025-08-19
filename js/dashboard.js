@@ -33,7 +33,7 @@ async function loadData() {
     } catch (error) {
         console.error('Error loading data:', error);
         document.getElementById('timeline-charts-container').innerHTML = 
-            `<div class="error">Error loading data: ${error.message}</div>`;
+            `<div class="row"><div class="col-12"><div class="alert alert-danger" role="alert">Error loading data: ${error.message}</div></div></div>`;
     }
 }
 
@@ -43,15 +43,46 @@ function createTimelineChart() {
     
     // Create a separate timeline chart for each IP address
     for (const ip in reputationData) {
-        // Create container for this IP's chart
+        // Get data and status first
+        const records = reputationData[ip];
+        const latestRecord = records[records.length - 1];
+        const currentStatus = latestRecord.status;
+        const statusText = {
+            'GREEN': 'Goed',
+            'YELLOW': 'Matig', 
+            'RED': 'Slecht'
+        }[currentStatus] || currentStatus;
+        
+        const badgeClass = {
+            'GREEN': 'bg-success',
+            'YELLOW': 'bg-warning text-dark',
+            'RED': 'bg-danger'
+        }[currentStatus] || 'bg-secondary';
+        
+        // Create Bootstrap grid container for this IP's chart
+        const chartWrapper = document.createElement('div');
+        chartWrapper.className = 'row mb-4';
+        
+        const chartCol = document.createElement('div');
+        chartCol.className = 'col-12';
+        
         const chartContainer = document.createElement('div');
-        chartContainer.className = 'chart-container';
-        chartContainer.innerHTML = `<div id="timeline-${ip.replace(/\./g, '-')}" style="min-height: 300px;"></div>`;
-        container.appendChild(chartContainer);
+        chartContainer.className = 'bg-white rounded p-3 shadow-sm';
+        chartContainer.style.minHeight = '360px';
+        chartContainer.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0 fw-bold">${ip}</h5>
+                <span class="badge ${badgeClass} px-3 py-2">${statusText}</span>
+            </div>
+            <div id="timeline-${ip.replace(/\./g, '-')}" class="w-100" style="min-height: 280px;"></div>
+        `;
+        
+        chartCol.appendChild(chartContainer);
+        chartWrapper.appendChild(chartCol);
+        container.appendChild(chartWrapper);
         
         // Prepare timeline data for this IP - only show status changes
         const timelineData = [];
-        const records = reputationData[ip];
         
         for (let i = 0; i < records.length; i++) {
             const record = records[i];
@@ -83,20 +114,74 @@ function createTimelineChart() {
         Highcharts.chart(`timeline-${ip.replace(/\./g, '-')}`, {
             chart: {
                 type: 'timeline',
-                height: 300,
+                height: 280,
                 zoomType: 'x',
+                pinchType: 'x',
                 panning: {
                     enabled: true,
                     type: 'x'
                 },
-                panKey: 'shift'
+                panKey: 'shift',
+                backgroundColor: 'transparent',
+                style: {
+                    fontFamily: 'inherit'
+                },
+                events: {
+                    load: function() {
+                        // Prevent default touch behavior on chart container
+                        this.container.style.touchAction = 'pinch-zoom pan-x';
+                    }
+                }
+            },
+            responsive: {
+                rules: [
+                    {
+                        condition: { maxWidth: 576 },  // Mobile phones
+                        chartOptions: {
+                            chart: { 
+                                height: 350,
+                                pinchType: 'x',
+                                panning: {
+                                    enabled: true,
+                                    type: 'x'
+                                }
+                            },
+                            title: { 
+                                style: { fontSize: '1em' }
+                            },
+                            subtitle: { 
+                                text: 'Knijp om in te zoomen, sleep om te pannen',
+                                style: { fontSize: '0.75em' }
+                            },
+                            plotOptions: {
+                                timeline: {
+                                    marker: { radius: 8 },
+                                    dataLabels: { enabled: false }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        condition: { maxWidth: 768, minWidth: 577 },  // Tablets
+                        chartOptions: {
+                            chart: { height: 320 },
+                            title: {
+                                style: { fontSize: '1.1em' }
+                            },
+                            subtitle: {
+                                style: { fontSize: '0.8em' }
+                            },
+                            plotOptions: {
+                                timeline: {
+                                    marker: { radius: 7 }
+                                }
+                            }
+                        }
+                    }
+                ]
             },
             title: {
-                text: `Timeline: ${ip}`,
-                style: {
-                    fontSize: '1.2em',
-                    fontWeight: 'bold'
-                }
+                text: null
             },
             subtitle: {
                 text: 'Reputatie gebeurtenissen over tijd (Sleep om in te zoomen, Shift+Sleep om te pannen)'
@@ -125,7 +210,7 @@ function createTimelineChart() {
             exporting: {
                 buttons: {
                     contextButton: {
-                        menuItems: ['viewFullscreen', 'separator', 'downloadPNG', 'downloadJPEG', 'downloadPDF', 'downloadSVG', 'separator', 'resetZoom']
+                        menuItems: ['viewFullscreen', 'separator', 'downloadPNG', 'downloadJPEG', 'downloadPDF', 'downloadSVG']
                     }
                 }
             },
@@ -167,7 +252,7 @@ function createTimelineChart() {
 // Initialize dashboard
 document.addEventListener('DOMContentLoaded', function() {
     // Show loading state
-    document.getElementById('timeline-charts-container').innerHTML = '<div class="loading">Laden van gegevens...</div>';
+    document.getElementById('timeline-charts-container').innerHTML = '<div class="row"><div class="col-12"><div class="d-flex justify-content-center align-items-center py-5 flex-column flex-sm-row"><div class="spinner-border me-0 me-sm-2 mb-2 mb-sm-0" role="status"><span class="visually-hidden">Loading...</span></div><span class="text-muted">Laden van gegevens...</span></div></div></div>';
     
     // Load data and create charts
     loadData();
