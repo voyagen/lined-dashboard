@@ -69,12 +69,25 @@ function createTimelineChart() {
         const chartContainer = document.createElement('div');
         chartContainer.className = 'bg-white rounded p-3 shadow-sm';
         chartContainer.style.minHeight = '360px';
+        // Format last update datetime
+        const lastUpdate = new Date(latestRecord.datetime);
+        const lastUpdateFormatted = lastUpdate.toLocaleDateString('nl-NL', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
         chartContainer.innerHTML = `
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="mb-0 fw-bold">${ip}</h5>
                 <span class="badge ${badgeClass} px-3 py-2">${statusText}</span>
             </div>
             <div id="timeline-${ip.replace(/\./g, '-')}" class="w-100" style="min-height: 280px;"></div>
+            <div class="mt-2 text-muted small text-end">
+                <i class="bi bi-clock"></i> Laatste update: ${lastUpdateFormatted}
+            </div>
         `;
         
         chartCol.appendChild(chartContainer);
@@ -229,14 +242,83 @@ function createTimelineChart() {
             },
             tooltip: {
                 useHTML: true,
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                borderWidth: 0,
+                borderRadius: 8,
+                shadow: true,
+                style: {
+                    fontSize: '13px',
+                    fontFamily: 'inherit'
+                },
                 formatter: function() {
+                    const statusColor = statusColors[this.point.options.custom?.status] || this.point.color;
                     return `
-                        <div style="padding: 8px;">
-                            <strong>${ip}</strong><br/>
-                            <strong>Datum:</strong> ${Highcharts.dateFormat('%d-%m-%Y %H:%M', this.x)}<br/>
-                            <strong>Status:</strong> ${this.point.name}<br/>
-                            <br/>
-                            ${this.point.description}
+                        <div style="
+                            padding: 12px 16px;
+                            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,249,250,0.95) 100%);
+                            border-radius: 8px;
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                            border: 1px solid rgba(0,0,0,0.1);
+                            min-width: 220px;
+                            font-family: inherit;
+                        ">
+                            <div style="
+                                display: flex;
+                                align-items: center;
+                                margin-bottom: 8px;
+                                padding-bottom: 8px;
+                                border-bottom: 1px solid rgba(0,0,0,0.1);
+                            ">
+                                <div style="
+                                    width: 12px;
+                                    height: 12px;
+                                    border-radius: 50%;
+                                    background: ${statusColor};
+                                    margin-right: 8px;
+                                    box-shadow: 0 0 0 2px rgba(255,255,255,0.8);
+                                "></div>
+                                <strong style="color: #2c3e50; font-size: 14px;">${ip}</strong>
+                            </div>
+                            
+                            <div style="margin-bottom: 8px;">
+                                <div style="
+                                    display: flex;
+                                    justify-content: space-between;
+                                    margin-bottom: 4px;
+                                    font-size: 12px;
+                                ">
+                                    <span style="color: #7f8c8d; font-weight: 500;">Datum:</span>
+                                    <span style="color: #2c3e50; font-weight: 600;">${Highcharts.dateFormat('%d/%m/%Y %H:%M', this.x)}</span>
+                                </div>
+                                <div style="
+                                    display: flex;
+                                    justify-content: space-between;
+                                    margin-bottom: 8px;
+                                    font-size: 12px;
+                                ">
+                                    <span style="color: #7f8c8d; font-weight: 500;">Status:</span>
+                                    <span style="
+                                        color: ${statusColor};
+                                        font-weight: 700;
+                                        text-transform: uppercase;
+                                        font-size: 11px;
+                                        padding: 2px 6px;
+                                        background: rgba(${statusColor === '#27ae60' ? '39,174,96' : statusColor === '#f39c12' ? '243,156,18' : '231,76,60'}, 0.1);
+                                        border-radius: 4px;
+                                    ">${this.point.name}</span>
+                                </div>
+                            </div>
+                            
+                            <div style="
+                                background: rgba(52,73,94,0.05);
+                                padding: 8px;
+                                border-radius: 4px;
+                                font-size: 12px;
+                                line-height: 1.4;
+                                color: #34495e;
+                            ">
+                                ${this.point.description}
+                            </div>
                         </div>
                     `;
                 }
