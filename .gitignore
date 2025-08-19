@@ -47,7 +47,7 @@ cache/
 
 # Config files with sensitive data
 config.php
-database.php
+config/database.php
 settings.php
 
 # Backup files
