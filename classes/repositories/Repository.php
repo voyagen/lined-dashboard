@@ -145,23 +145,4 @@ abstract class Repository {
         return (int)$result['count'];
     }
 
-    /**
-     * Fetch raw SQL results
-     * @param string $sql The SQL query to execute
-     * @param array $params Parameters to bind to the SQL query
-     * @return array Returns an array of results
-     */
-    public function fetchRaw($sql, $params = []) {
-        return $this->db->fetchAll($sql, $params);
-    }
-
-    /**
-     * Fetch a single raw result
-     * @param string $sql The SQL query to execute
-     * @param array $params Parameters to bind to the SQL query
-     * @return array|false Returns a single result row or false if not found
-     */
-    public function fetchOneRaw($sql, $params = []) {
-        return $this->db->fetchOne($sql, $params);
-    }
 }

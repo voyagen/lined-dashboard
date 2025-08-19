@@ -18,6 +18,10 @@ class IpReputation {
         }
     }
 
+    /**
+     * Hydrate the model with data from an associative array.
+     * @param array $data Associative array containing model data
+     */
     public function hydrate($data) {
         $this->id = $data['id'] ?? null;
         $this->ip = $data['ip'] ?? null;
@@ -31,6 +35,10 @@ class IpReputation {
         $this->jmrSender = $data['jmr_sender'] ?? null;
     }
 
+    /**
+     * Convert the model to an associative array for JSON serialization or API responses.
+     * @return array Returns an associative array representation of the model
+     */
     public function toArray() {
         return [
             'id' => $this->id,
@@ -46,9 +54,6 @@ class IpReputation {
         ];
     }
 
-    public function toJson() {
-        return json_encode($this->toArray());
-    }
 
     // Getters
     public function getId() {
@@ -127,6 +132,10 @@ class IpReputation {
                $this->trapsHit > 0;
     }
 
+    /**
+     * Get the priority of the status for sorting or display purposes.
+     * @return int Returns a priority value where lower is better (1 = GREEN, 2 = YELLOW, 3 = RED)
+     */
     public function getStatusPriority() {
         switch ($this->status) {
             case 'GREEN': return 1;

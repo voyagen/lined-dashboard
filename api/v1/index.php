@@ -16,6 +16,11 @@ class ApiController {
         }
     }
 
+    /**
+     * Handle incoming API requests based on the action parameter.
+     * This method routes the request to the appropriate handler
+     * based on the 'action' query parameter.
+     */
     public function handleRequest() {
         $action = $_GET['action'] ?? 'dashboard';
 
@@ -42,6 +47,9 @@ class ApiController {
         }
     }
 
+    /**
+     * Get dashboard data including timeline and statistics.
+     */
     private function getDashboardData() {
         // Get timeline data for charts
         $timelineData = $this->ipReputationRepository->getTimelineData();
@@ -65,6 +73,9 @@ class ApiController {
         ]);
     }
 
+    /**
+     * Get timeline data for the dashboard.
+     */
     private function getTimelineData() {
         $timelineData = $this->ipReputationRepository->getTimelineData();
         
@@ -93,6 +104,9 @@ class ApiController {
         ]);
     }
 
+    /**
+     * Get dashboard statistics including problematic and healthy IPs,
+     */
     private function getStats() {
         $stats = $this->ipReputationRepository->getDashboardStats();
         
@@ -115,6 +129,9 @@ class ApiController {
         $this->sendSuccess($stats);
     }
 
+    /**
+     * Get data for a specific IP address.
+     */
     private function getIpData($ip) {
         if (!$ip) {
             $this->sendError('IP parameter is required');
